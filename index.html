@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>대전도시공사 이해관계자 소통채널 맵 (가시화 레이아웃)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --creator:#0e7490; --creator-mid:#0891b2; --creator-lt:#cffafe; --creator-bg:#f0fdff; --creator-bdr:#a5f3fc;
+  --delivery:#4f46e5; --delivery-mid:#6366f1; --delivery-lt:#e0e7ff; --delivery-bg:#eef2ff; --delivery-bdr:#c7d2fe;
+  --consumer:#0f766e; --consumer-mid:#0d9488; --consumer-lt:#ccfbf1; --consumer-bg:#f0fdf9; --consumer-bdr:#99f6e4;
+  --influencer:#92400e; --influencer-mid:#b45309; --influencer-lt:#fef3c7; --influencer-bg:#fffbeb; --influencer-bdr:#fde68a;
+
+  --center-grad-a:#1e3a5f; --center-grad-b:#1e4976;
+  --page-bg:#f8fafc; --card-bg:#ffffff; --text-main:#0f172a; --text-sub:#64748b; --text-xs:#94a3b8;
+  --divider:#e2e8f0;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.07), 0 2px 12px rgba(0,0,0,.04);
+  --shadow-md:0 12px 30px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:radial-gradient(1200px 700px at 50% -10%, rgba(99,102,241,.12), transparent 60%),
+             radial-gradient(900px 600px at 10% 30%, rgba(8,145,178,.10), transparent 55%),
+             radial-gradient(900px 600px at 90% 35%, rgba(13,148,136,.10), transparent 55%),
+             var(--page-bg);
+  color:var(--text-main);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Header */
+.header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--divider);
+}
+.header-inner{
+  max-width:1240px;margin:0 auto;
+  padding:18px 18px 14px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+}
+.org-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:999px;
+  background:var(--creator-bg);
+  border:1px solid var(--creator-bdr);
+  color:var(--creator);
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.org-dot{width:7px;height:7px;border-radius:50%;background:var(--creator-mid);box-shadow:0 0 0 6px rgba(8,145,178,.12);}
+.h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:8px;line-height:1.2;}
+.h2{font-size:12.5px;color:var(--text-sub);margin-top:6px;line-height:1.5;}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.stat{
+  background:rgba(248,250,252,.9);
+  border:1px solid var(--divider);
+  border-radius:14px;
+  padding:9px 14px;
+  min-width:82px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.stat .n{font-size:18px;font-weight:900;line-height:1;}
+.stat .l{font-size:10px;color:var(--text-xs);margin-top:4px;white-space:nowrap;}
+.stat.creator .n{color:var(--creator-mid);}
+.stat.delivery .n{color:var(--delivery-mid);}
+.stat.consumer .n{color:var(--consumer-mid);}
+.stat.influencer .n{color:var(--influencer-mid);}
+.stat.meta .n{color:#6366f1;}
+
+/* Legend */
+.legend{
+  border-top:1px solid rgba(226,232,240,.65);
+}
+.legend-inner{
+  max-width:1240px;margin:0 auto;
+  padding:10px 18px 12px;
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+}
+.legend-title{font-size:11px;font-weight:700;color:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;margin-right:4px;}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:999px;
+  font-size:11px;font-weight:700;
+  border:1px solid transparent;
+  cursor:default;
+}
+.dot{width:8px;height:8px;border-radius:50%;}
+.chip.creator{background:var(--creator-bg);border-color:var(--creator-bdr);color:var(--creator);}
+.chip.creator .dot{background:var(--creator-mid);}
+.chip.delivery{background:var(--delivery-bg);border-color:var(--delivery-bdr);color:var(--delivery);}
+.chip.delivery .dot{background:var(--delivery-mid);}
+.chip.consumer{background:var(--consumer-bg);border-color:var(--consumer-bdr);color:var(--consumer);}
+.chip.consumer .dot{background:var(--consumer-mid);}
+.chip.influencer{background:var(--influencer-bg);border-color:var(--influencer-bdr);color:var(--influencer);}
+.chip.influencer .dot{background:var(--influencer-mid);}
+.legend-hint{margin-left:auto;font-size:11px;color:var(--text-xs);display:flex;gap:6px;align-items:center;}
+
+/* Main wrapper */
+.wrap{max-width:1240px;margin:0 auto;padding:22px 18px 54px;}
+
+/* Map grid: influencer top, creator left, consumer right, delivery bottom, core center */
+.map{
+  display:grid;
+  grid-template-columns: 1fr 320px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "top top top"
+    "left center right"
+    "bottom bottom bottom";
+  gap:16px;
+  align-items:stretch;
+}
+
+/* Panels */
+.panel{
+  background:rgba(255,255,255,.82);
+  border:1px solid var(--divider);
+  border-radius:18px;
+  padding:14px 14px 12px;
+  box-shadow:var(--shadow-sm);
+  position:relative;
+  overflow:hidden;
+}
+.panel::before{
+  content:"";
+  position:absolute;inset:-2px;
+  background:linear-gradient(135deg, rgba(148,163,184,.20), rgba(148,163,184,0));
+  opacity:.65;
+  pointer-events:none;
+}
+.panel > *{position:relative;}
+
+.panel.top{grid-area:top;}
+.panel.left{grid-area:left;}
+.panel.right{grid-area:right;}
+.panel.bottom{grid-area:bottom;}
+
+.p-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  margin-bottom:12px;
+}
+.p-title{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 12px;border-radius:12px;
+  font-size:12px;font-weight:900;letter-spacing:-.01em;
+  border:1px solid transparent;
+}
+.p-desc{margin-top:7px;font-size:11px;color:var(--text-xs);line-height:1.5;max-width:820px;}
+.p-meta{font-size:11px;color:var(--text-xs);white-space:nowrap;margin-top:2px;}
+
+.panel.top .p-title{background:var(--influencer-lt);border-color:var(--influencer-bdr);color:var(--influencer);}
+.panel.left .p-title{background:var(--creator-lt);border-color:var(--creator-bdr);color:var(--creator);}
+.panel.bottom .p-title{background:var(--consumer-lt);border-color:var(--consumer-bdr);color:var(--consumer);}
+.panel.right .p-title{background:var(--delivery-lt);border-color:var(--delivery-bdr);color:var(--delivery);}
+
+/* Core center */
+.core{
+  grid-area:center;
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.72));
+  border:1px solid var(--divider);
+  border-radius:18px;
+  box-shadow:var(--shadow-sm);
+  padding:16px 14px 14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+.core::before{
+  content:"";
+  position:absolute;inset:-120px;
+  background:radial-gradient(circle at 50% 45%, rgba(30,73,118,.22), rgba(30,73,118,0) 60%);
+  pointer-events:none;
+}
+.core > *{position:relative;}
+
+.orb{
+  width:156px;height:156px;border-radius:50%;
+  background:linear-gradient(145deg,var(--center-grad-a),var(--center-grad-b));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:
+    0 0 0 10px rgba(30,73,118,.08),
+    0 0 0 22px rgba(30,73,118,.04),
+    0 14px 46px rgba(30,73,118,.30);
+}
+.orb .ico{font-size:36px;margin-bottom:6px;}
+.orb .name{font-size:14px;font-weight:900;color:#fff;letter-spacing:-.01em;text-align:center;line-height:1.25;}
+.orb .sub{margin-top:4px;font-size:10px;color:rgba(255,255,255,.68);text-align:center;}
+.core-lines{
+  position:absolute;inset:0;pointer-events:none;
+}
+.core-lines::before{
+  content:"";
+  position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg, rgba(253,230,138,.85), rgba(226,232,240,.65), rgba(199,210,254,.85));
+  transform:translateX(-0.5px);
+  opacity:.55;
+}
+.core-lines::after{
+  content:"";
+  position:absolute;top:50%;left:0;right:0;height:1px;
+  background:linear-gradient(90deg, rgba(165,243,252,.85), rgba(226,232,240,.65), rgba(153,246,228,.85));
+  transform:translateY(-0.5px);
+  opacity:.55;
+}
+
+.core-ch{
+  width:100%;
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.core-pill{
+  background:#fff;border:1px solid var(--divider);
+  border-radius:12px;
+  padding:8px 10px;
+  display:flex;gap:8px;align-items:flex-start;
+  font-size:10.5px;color:var(--text-sub);font-weight:600;line-height:1.35;
+  transition:all .16s;
+}
+.core-pill:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);border-color:#cbd5e1;color:var(--text-main);}
+.core-pill .i{font-size:13px;line-height:1;margin-top:1px;}
+
+/* Cards */
+.grid{display:grid;gap:12px;}
+.grid.cols-5{grid-template-columns:repeat(5, minmax(0,1fr));}
+.grid.cols-2{grid-template-columns:repeat(2, minmax(0,1fr));}
+.grid.cols-3{grid-template-columns:repeat(3, minmax(0,1fr));}
+.grid.cols-8{grid-template-columns:repeat(8, minmax(0,1fr));gap:8px;}
+
+.card{
+  background:var(--card-bg);
+  border:1px solid var(--divider);
+  border-radius:16px;
+  padding:14px 14px 12px;
+  cursor:pointer;
+  transition:all .18s cubic-bezier(.34,1.2,.64,1);
+  position:relative;
+  overflow:hidden;
+}
+.card::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+
+/* Tall vertical cards (for 8-in-a-row delivery layout) */
+.card.tall{min-height:180px;display:flex;flex-direction:column;padding:10px 10px;}
+.card.tall .head{margin-bottom:8px;}
+.card.tall .name{font-size:13px;}
+.card.tall .desc{font-size:11px; line-height:1.5; margin-bottom:10px;}
+.card.tall .tags{margin-top:auto;}
+.card .head{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;align-items:flex-start;}
+.card .emoji{font-size:20px;line-height:1;}
+.badge{
+  font-size:9px;font-weight:900;padding:3px 8px;border-radius:999px;border:1px solid transparent;white-space:nowrap;
+}
+.card .name{font-size:13px;font-weight:900;letter-spacing:-.01em;line-height:1.25;margin-bottom:5px;}
+.card .desc{font-size:10.7px;color:var(--text-sub);line-height:1.55;margin-bottom:10px;}
+.tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:8px;
+  font-size:10px;font-weight:600;
+  background:#f1f5f9;color:var(--text-sub);
+  border:1px solid var(--divider);
+}
+.tag:hover{background:var(--page-bg);color:var(--text-main);}
+
+.card.influencer::after{background:linear-gradient(90deg,var(--influencer),var(--influencer-mid));}
+.card.influencer .badge{background:var(--influencer-lt);color:var(--influencer);border-color:var(--influencer-bdr);}
+.card.creator::after{background:linear-gradient(90deg,var(--creator),var(--creator-mid));}
+.card.creator .badge{background:var(--creator-lt);color:var(--creator);border-color:var(--creator-bdr);}
+.card.consumer::after{background:linear-gradient(90deg,var(--consumer),var(--consumer-mid));}
+.card.consumer .badge{background:var(--consumer-lt);color:var(--consumer);border-color:var(--consumer-bdr);}
+.card.delivery::after{background:linear-gradient(90deg,var(--delivery),var(--delivery-mid));}
+.card.delivery .badge{background:var(--delivery-lt);color:var(--delivery);border-color:var(--delivery-bdr);}
+
+/* Footer channel taxonomy */
+.footer{
+  margin-top:16px;
+  background:rgba(255,255,255,.82);
+  border:1px solid var(--divider);
+  border-radius:18px;
+  padding:16px 16px 14px;
+  box-shadow:var(--shadow-sm);
+}
+.footer-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;font-weight:900;color:var(--text-sub);
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.footer-title::before{
+  content:"";width:16px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--creator-mid),var(--consumer-mid));
+}
+.boxes{display:grid;grid-template-columns:repeat(6, minmax(0,1fr));gap:10px;}
+.box{
+  background:rgba(248,250,252,.95);
+  border:1px solid var(--divider);
+  border-radius:14px;
+  padding:12px 10px;
+  text-align:center;
+}
+.box .i{font-size:22px;margin-bottom:6px;}
+.box .n{font-size:11px;font-weight:900;margin-bottom:3px;}
+.box .d{font-size:9.7px;color:var(--text-xs);line-height:1.5;}
+
+/* Modal */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(15,23,42,.52);
+  backdrop-filter:blur(6px);
+  z-index:200;
+  align-items:center;justify-content:center;
+}
+.overlay.on{display:flex;}
+.modal{
+  background:#fff;border-radius:22px;
+  padding:30px;max-width:520px;width:92%;
+  position:relative;
+  box-shadow:0 28px 86px rgba(0,0,0,.26);
+  animation:pop .24s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop{from{transform:scale(.84);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid var(--divider);
+  background:var(--page-bg);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-sub);
+  transition:all .15s;
+}
+.modal-close:hover{background:var(--divider);color:var(--text-main);}
+.m-emoji{font-size:40px;margin-bottom:10px;}
+.m-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:10px;font-weight:900;padding:4px 10px;border-radius:999px;margin-bottom:8px;
+}
+.m-name{font-size:19px;font-weight:900;letter-spacing:-.01em;margin-bottom:6px;}
+.m-desc{font-size:12.5px;color:var(--text-sub);line-height:1.7;margin-bottom:16px;}
+.m-ct{font-size:10.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--text-xs);margin-bottom:10px;}
+.m-list{display:flex;flex-direction:column;gap:8px;}
+.m-row{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 12px;border-radius:12px;
+  background:var(--page-bg);
+  border:1px solid var(--divider);
+}
+.m-row .i{font-size:16px;margin-top:1px;}
+.m-row .t{font-size:12px;font-weight:800;}
+.m-row .d{font-size:10.5px;color:var(--text-sub);margin-top:2px;line-height:1.45;}
+
+/* Responsive */
+@media(max-width:1180px){
+  .grid.cols-5{grid-template-columns:repeat(3, minmax(0,1fr));}
+  .boxes{grid-template-columns:repeat(3, minmax(0,1fr));}
+}
+@media(max-width:980px){
+  .map{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto auto auto;
+    grid-template-areas:
+      "center"
+      "top"
+      "left"
+      "right"
+      "bottom";
+  }
+  .core-ch{grid-template-columns:1fr;}
+  .grid.cols-2{grid-template-columns:1fr;}
+  .grid.cols-3{grid-template-columns:1fr;}
+  .stats{display:none;}
+  .legend-hint{margin-left:0;}
+}
+@media(max-width:520px){
+  .header-inner{padding:16px 14px 12px;}
+  .legend-inner{padding:10px 14px 12px;}
+  .wrap{padding:18px 14px 46px;}
+}
+
+@media(max-width:1100px){.grid.cols-8{grid-template-columns:repeat(4, minmax(0,1fr));}}
+@media(max-width:860px){.grid.cols-8{grid-template-columns:repeat(2, minmax(0,1fr));}}
+
+/* Wide horizontal cards (for creator 3-row visibility) */
+.card.wide{padding:10px 14px; min-height:110px;}
+.card.wide .head{margin-bottom:6px;}
+.card.wide .emoji{font-size:18px;}
+.card.wide .name{font-size:13px; line-height:1.2;}
+.card.wide .desc{font-size:10.8px; line-height:1.45; margin-bottom:8px;}
+.card.wide .tags{gap:6px; flex-wrap:wrap;}
+.card.wide .tag{font-size:9.5px; padding:3px 7px;}
+
+/* FORCE creator cards to be horizontal (3 rows, not tall) */
+.panel.left .grid{grid-template-columns:1fr !important;}
+.panel.left .card.creator{
+  min-height:90px !important;
+  height:auto !important;
+  padding:10px 14px !important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.panel.left .card.creator .desc{margin-bottom:6px;}
+.panel.left .card.creator .tags{gap:6px;}
+
+</style>
+</head>
+<body>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="m-emoji" id="mEmoji"></div>
+    <div class="m-badge" id="mBadge"></div>
+    <div class="m-name"  id="mName"></div>
+    <div class="m-desc"  id="mDesc"></div>
+    <div class="m-ct">📡 소통 채널 상세</div>
+    <div class="m-list" id="mChannels"></div>
+  </div>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div>
+      <div class="org-pill"><span class="org-dot"></span>대전도시공사 · 이해관계자 소통</div>
+      <div class="h1">이해관계자 소통채널 맵</div>
+      <div class="h2">상단(영향) · 좌측(창출) · 우측(소비) · 하단(전달)로 배치하여 “중앙-주변” 관계가 한 눈에 보이도록 재구성</div>
+    </div>
+    <div class="stats">
+      <div class="stat creator"><div class="n">1</div><div class="l">가치 창출형</div></div>
+      <div class="stat delivery"><div class="n">3</div><div class="l">가치 전달형</div></div>
+      <div class="stat consumer"><div class="n">8</div><div class="l">가치 소비형</div></div>
+      <div class="stat influencer"><div class="n">5</div><div class="l">가치 영향형</div></div>
+      <div class="stat meta"><div class="n">7</div><div class="l">소통 채널 유형</div></div>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-inner">
+      <span class="legend-title">구분</span>
+      <span class="chip influencer"><span class="dot"></span>가치 영향형</span>
+      <span class="chip creator"><span class="dot"></span>가치 창출형</span>
+      <span class="chip delivery"><span class="dot"></span>가치 전달형</span>
+      <span class="chip consumer"><span class="dot"></span>가치 소비형</span>
+      <span class="legend-hint">🖱️ 카드 클릭 → 채널 상세</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+<section class="map">
+
+    <!-- TOP: INFLUENCER -->
+    <div class="panel top">
+      <div class="p-head">
+        <div>
+          <div class="p-title">🌐 가치 영향형 이해관계자</div>
+          <div class="p-desc">정책·감독·규제·여론을 통해 대전도시공사 경영 환경에 영향을 미치는 외부 주체</div>
+        </div>
+        <div class="p-meta">TOP</div>
+      </div>
+
+      <div class="grid cols-5">
+        <div class="card influencer" onclick="open_('지방자치단체(대전광역시)','🏛️','influencer','대전도시공사의 설립 주체이자 최대 출자자. 경영목표·예산·사업방향 결정에 직접적 영향력을 행사하며 경영평가 등을 통해 관리·감독을 수행.',['📋 공문·보고서','연간 경영보고·업무협조 공문, 주요 현안 수시보고'],['🤝 정기 협의체','업무협의회(반기 1회 이상) 및 현안보고(수시)'],['📊 경영공시','지방공기업 경영공시 시스템(클린아이) 등을 통한 실적 공개'])">
+          <div class="head"><span class="emoji">🏛️</span><span class="badge">영향형</span></div>
+          <div class="name">지방자치단체(대전광역시)</div>
+          <div class="desc">설립 주체·최대 출자자·경영감독</div>
+          <div class="tags"><span class="tag">📋 공문·보고</span><span class="tag">🤝 협의체</span><span class="tag">📊 공시</span></div>
+        </div>
+
+        <div class="card influencer" onclick="open_('지방의회(대전시의회)','⚖️','influencer','주요 사업·예산·정관 변경에 대한 의결 및 행정사무감사 권한 보유. 주민 의견을 대변하는 정치적 감시 기능 수행.',['📝 의회 보고','행정사무감사 자료제출·답변, 현안 보고'],['🏛️ 의원 면담·간담회','주요 현안 관련 상임위원회 보고, 개별 의원 면담'],['📋 서면 답변','의원 질의·자료요청에 대한 공식 서면 답변'])">
+          <div class="head"><span class="emoji">⚖️</span><span class="badge">영향형</span></div>
+          <div class="name">지방의회(대전시의회)</div>
+          <div class="desc">행정사무감사·업무보고·예산 의결</div>
+          <div class="tags"><span class="tag">📝 의회</span><span class="tag">🏛️ 간담</span><span class="tag">📋 서면</span></div>
+        </div>
+
+        <div class="card influencer" onclick="open_('중앙정부·유관 부처','🏢','influencer','행정안전부, 국토교통부, 기획재정부 등 도시개발·주거·공기업 관련 법령·정책·예산 기준을 수립하는 상위 규제 기관.',['📜 공문·지침','정책지침 접수·이행 보고, 전자공문'],['💻 공시 시스템','공공기관 경영공시(알리오·클린아이) 의무 공시'],['📊 통계·조사','지방공기업 현황 등 조사 참여'])">
+          <div class="head"><span class="emoji">🏢</span><span class="badge">영향형</span></div>
+          <div class="name">중앙정부·유관 부처</div>
+          <div class="desc">법령·정책·예산 기준 수립</div>
+          <div class="tags"><span class="tag">📜 지침</span><span class="tag">💻 공시</span><span class="tag">📊 조사</span></div>
+        </div>
+
+        <div class="card influencer" onclick="open_('언론·미디어','📰','influencer','공사 사업 추진 현황, 경영성과, 사회적 역할에 대한 대외 이미지와 여론을 형성하는 주체. 보도 방향이 이해관계자 신뢰에 직접 영향.',['📣 보도자료','정기·수시 언론 배포, 공식 입장 발표'],['🎙️ 기자간담회·브리핑','주요 이벤트 시 브리핑 및 질의응답'],['📲 소셜미디어','공식 SNS 채널 운영 및 이슈 대응'])">
+          <div class="head"><span class="emoji">📰</span><span class="badge">영향형</span></div>
+          <div class="name">언론·미디어</div>
+          <div class="desc">대외 이미지·여론 형성</div>
+          <div class="tags"><span class="tag">📣 보도</span><span class="tag">🎙️ 브리핑</span><span class="tag">📲 SNS</span></div>
+        </div>
+
+        <div class="card influencer" onclick="open_('시민단체·지역사회','🤲','influencer','도시재생·주거복지·환경 등 공익적 관점에서 공사 사업의 수용성과 방향에 영향력을 행사하는 지역 기반 이해당사자.',['💬 주민 설명회·공청회','사업 착수 전 지역 주민 의견 수렴'],['🌐 온라인 의견 수렴','홈페이지·SNS 통한 공개 의견 접수'],['🤝 지역협의체','지역사회 현안 논의 정기 협의 채널'])">
+          <div class="head"><span class="emoji">🤲</span><span class="badge">영향형</span></div>
+          <div class="name">시민단체·지역사회</div>
+          <div class="desc">공익·수용성 영향력</div>
+          <div class="tags"><span class="tag">💬 공청</span><span class="tag">🌐 의견</span><span class="tag">🤝 협의</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEFT: CREATOR -->
+    <div class="panel left">
+      <div class="p-head">
+        <div>
+          <div class="p-title">💙 가치 창출형 이해관계자</div>
+          <div class="p-desc">공사의 성과와 서비스 품질을 내부에서 만들어 내는 실행 주체</div>
+        </div>
+        <div class="p-meta">LEFT</div>
+      </div>
+
+      
+      <div class="grid cols-8">
+        <div class="card creator" onclick="open_('임직원','👨‍💼','creator','대전도시공사 사업·서비스를 직접 수행하는 핵심 내부 실행 주체. 고객 접점 품질과 안전·윤리·성과가 현장 실행에서 결정됨.',['💌 내부 소통','인트라넷·사내 이메일·공지사항'],['🎓 교육·연수','직무·CS·안전·윤리 교육'],['🗳️ 의견수렴','직원 만족도 조사·제안제도'],['👥 타운홀·간담','부서/현장 간담회, 타운홀(수시)'])">
+          <div class="head"><span class="emoji">👨‍💼</span><span class="badge">창출형</span></div>
+          <div class="name">임직원</div>
+          <div class="desc">사업·서비스를 직접 수행하는 내부 실행 주체</div>
+          <div class="tags"><span class="tag">💌 내부소통</span><span class="tag">🎓 교육</span><span class="tag">🗳️ 의견</span></div>
+        </div>
+
+        <div class="card creator" onclick="open_('노동조합','🤝','creator','근로조건·조직문화·안전·복지 등과 관련한 핵심 내부 파트너. 노사 신뢰가 서비스 품질·현장 안정성·조직 몰입에 직접 영향.',['📢 노사협의','노사협의회·단체협약(정기/수시)'],['📝 고충처리','고충상담·조정·재발방지'],['🛡️ 안전·복지','산업안전·복지제도 개선 협의'],['🤝 소통창구','노사 간담회·공동 TF(필요 시)'])">
+          <div class="head"><span class="emoji">🤝</span><span class="badge">창출형</span></div>
+          <div class="name">노동조합</div>
+          <div class="desc">노사협력 기반의 조직 안정·서비스 품질 파트너</div>
+          <div class="tags"><span class="tag">📢 노사</span><span class="tag">📝 고충</span><span class="tag">🛡️ 안전</span></div>
+        </div>
+
+        <div class="card creator" onclick="open_('내부 참여조직','🧩','creator','혁신 어벤져스, 청렴 멘토단 등 직원 일부로 구성된 참여형 내부 조직. 제안·캠페인·개선과제 발굴을 통해 혁신/청렴/서비스 품질을 상향.',['🚀 혁신 어벤져스','업무개선 과제 발굴·실행, 성과 공유'],['🧼 청렴 멘토단','청렴문화 확산, 사례 공유·자문'],['💡 제안·아이디어','제안제도 운영, 아이디어톤/워크숍'],['📣 캠페인','고객만족·안전·청렴 캠페인, 내부 홍보'])">
+          <div class="head"><span class="emoji">🧩</span><span class="badge">창출형</span></div>
+          <div class="name">내부 참여조직</div>
+          <div class="desc">혁신 어벤져스·청렴 멘토단 등 직원 참여 기반 조직</div>
+          <div class="tags"><span class="tag">🚀 혁신</span><span class="tag">🧼 청렴</span><span class="tag">💡 제안</span></div>
+        </div>
+</div>
+
+</div>
+        <div class="card creator" style="cursor:default;opacity:.72" onclick="">
+          <div class="head"><span class="emoji">➕</span><span class="badge">확장</span></div>
+          <div class="name">추가(선택)</div>
+          <div class="desc">향후 내부 실행 주체(부서/현장조직 등) 세분화 시 확장</div>
+          <div class="tags"><span class="tag">🧩 옵션</span><span class="tag">📌 세분</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: CORE -->
+    <div class="core">
+      <div class="core-lines"></div>
+      <div class="orb">
+        <div class="ico">🏙️</div>
+        <div class="name">대전도시공사</div>
+        <div class="sub">Daejeon Urban Corporation</div>
+      </div>
+
+      <div class="core-ch">
+        <div class="core-pill"><span class="i">🌐</span><div>공식 홈페이지·국민신문고<br><span style="color:var(--text-xs);font-weight:700;">공지·신청·처리현황</span></div></div>
+        <div class="core-pill"><span class="i">📞</span><div>상담(대표/전담)<br><span style="color:var(--text-xs);font-weight:700;">문의·민원·안내</span></div></div>
+        <div class="core-pill"><span class="i">📱</span><div>SNS·카카오채널<br><span style="color:var(--text-xs);font-weight:700;">홍보·알림·소통</span></div></div>
+        <div class="core-pill"><span class="i">📋</span><div>공문·경영 공시 시스템<br><span style="color:var(--text-xs);font-weight:700;">보고·공개·규정</span></div></div>
+        <div class="core-pill"><span class="i">🤝</span><div>협의체·간담회<br><span style="color:var(--text-xs);font-weight:700;">현안 논의·조정</span></div></div>
+        <div class="core-pill"><span class="i">🏘️</span><div>현장·방문 채널<br><span style="color:var(--text-xs);font-weight:700;">안내·접수·대응</span></div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONSUMER -->
+    <div class="panel bottom">
+      <div class="p-head">
+        <div>
+          <div class="p-title">💜 가치 전달형 이해관계자</div>
+          <div class="p-desc">가치가 고객에게 전달되도록 공급·조달·협력 구조를 지지하는 파트너</div>
+        </div>
+        <div class="p-meta">RIGHT</div>
+      </div>
+
+      <div class="grid cols-8">
+        <div class="card consumer" onclick="open_('일반 시민·지역주민','🌆','consumer','대전도시공사 사업(주택·개발·환경·시설)과 공공서비스를 직·간접적으로 이용하는 지역 주민 전반. 공공성 확보와 사업 수용성 제고를 위한 폭넓은 소통이 필요.',['🌐 공식 홈페이지·SNS','사업 현황·공지·이벤트 정보 제공 및 의견 수렴'],['💬 참여·수렴','온라인 설문, 주민참여 공모, 공청회 참여'],['📰 보도·홍보','보도자료, 뉴스레터·홍보물 배포'],['🏘️ 현장 안내','설명회, 현장 민원 창구 운영'])">
+          <div class="head"><span class="emoji">🌆</span><span class="badge">소비형</span></div>
+          <div class="name">일반 시민·지역주민</div>
+          <div class="desc">공공서비스 수요자 전반. 공공성·수용성 제고 소통</div>
+          <div class="tags"><span class="tag">🌐 디지털</span><span class="tag">💬 참여</span><span class="tag">🏘️ 현장</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('입주민(임대)','🏠','consumer','대전도시공사 임대주택 실거주자(취약계층 포함). 주거복지 서비스의 핵심 고객으로, 민원·주거환경·관리서비스 품질과 직결되는 최우선 이해관계자. 디지털·이동 접근성 취약 고객을 위한 대면·복지 연계 채널 병행이 필요.',['📞 콜센터·민원 채널','입주민 상담, 긴급·불편 민원 접수 및 처리'],['🌐 홈페이지·모바일 서비스','민원 신청·처리현황 조회, 공지사항, 청구·납부 안내'],['🏢 관리사무소·현장 창구','방문 상담·접수, 단지 안내 및 즉시 조치 연계'],['🎤 입주민 간담회','단지별 간담회, 주요 현안 공유 및 의견수렴'],['🏘️ 복지관·사회복지사 연계','취약계층 정보 전달, 사례관리 연계 소통'],['🏠 방문 서비스','거동불편·고령 등 대상 방문 상담 및 지원 연계'],['📮 서면·우편 안내','디지털 접근 어려운 고객 대상 서면 안내'])">
+          <div class="head"><span class="emoji">🏠</span><span class="badge">소비형</span></div>
+          <div class="name">입주민(임대)</div>
+          <div class="desc">임대 실거주자(취약계층 포함). 대면·복지연계 병행</div>
+          <div class="tags"><span class="tag">📞 민원</span><span class="tag">🏘️ 복지</span><span class="tag">🏢 창구</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('청약 대기자·예비 수요자·기분양 고객','📝','consumer','분양·임대 청약 접수자/대기자 및 기분양 계약 고객. 공급정보의 투명성, 계약·입주 절차 안내, 변경사항의 신속 공지가 신뢰 확보의 핵심.',['🌐 청약·분양 안내','공고·일정·자격·당첨/계약 안내, 변경사항 공지'],['📧 개인 알림','일정·보완·계약/입주 단계별 문자·이메일 안내'],['📞 상담 채널','자격·절차·서류·계약 관련 상담'],['📋 설명회·안내자료','공급/입주 안내문, 사전 설명회, FAQ 제공'])">
+          <div class="head"><span class="emoji">📝</span><span class="badge">소비형</span></div>
+          <div class="name">청약·예비수요·기분양</div>
+          <div class="desc">청약/대기 + 기분양. 절차 안내·변경공지 신속성</div>
+          <div class="tags"><span class="tag">🌐 안내</span><span class="tag">📧 알림</span><span class="tag">📞 상담</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('개발사업 인근 주민·토지주','🏗️','consumer','택지개발·도시재생 등 개발사업 구역 내외 주민 및 토지 소유자. 사업 수용성과 직결되며 보상 협의, 생활 불편 최소화, 정보 공개가 핵심 소통 과제.',['📋 주민 설명회·공청회','사업 단계별 주민 의견 수렴'],['🤝 보상 협의','토지·건물 보상 관련 개별 면담 및 협의'],['🌐 사업 정보 공개','사업 현황·일정·보상 기준 공개'],['📞 주민 전담 상담','사업지구 전담 상담 창구 운영'])">
+          <div class="head"><span class="emoji">🏗️</span><span class="badge">소비형</span></div>
+          <div class="name">개발사업 인근 주민·토지주</div>
+          <div class="desc">수용성 핵심. 보상·불편 최소화·정보공개</div>
+          <div class="tags"><span class="tag">📋 설명</span><span class="tag">🤝 보상</span><span class="tag">🌐 공개</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('오월드 이용고객','🎡','consumer','대전오월드 방문객 및 이용고객. 안전·혼잡·요금·시설상태 등 현장 경험이 만족도와 재방문의 핵심 요인.',['🎫 예약·예매 안내','오월드 홈페이지/예매처를 통한 운영정보·요금·이벤트 안내'],['📞 고객지원(현장/전화)','이용문의·분실물·불편 접수, 운영시간 내 상담'],['🏁 현장 안내데스크','민원·불편 접수 및 즉시 안내, 안전 관련 대응'],['💬 만족도 조사·의견수렴','현장/온라인 설문, 개선의견 접수 및 반영'])">
+          <div class="head"><span class="emoji">🎡</span><span class="badge">소비형</span></div>
+          <div class="name">오월드 이용고객</div>
+          <div class="desc">이용경험(안전·혼잡·시설상태)이 만족도·재방문에 직결</div>
+          <div class="tags"><span class="tag">🎫 예매</span><span class="tag">🏁 현장</span><span class="tag">💬 만족</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('환경시설 이용고객','♻️','consumer','자원순환·환경기초시설 등 공사가 운영/관리하는 환경시설의 이용자(반입 주체 포함). 이용 절차의 명확성, 안전, 민원 대응 속도가 핵심.',['📋 이용안내·반입 기준','반입시간·기준·절차·수수료 안내'],['📞 시설 민원·상담','이용 절차 문의, 불편·피해 접수 및 처리'],['🏘️ 환경학교 접수','현장 방문 안내, 안전·운영 온라인 접수 시스템'],['📣 공지·알림','정비·작업 등 운영변경 사전 공지'])">
+          <div class="head"><span class="emoji">♻️</span><span class="badge">소비형</span></div>
+          <div class="name">환경시설 이용고객</div>
+          <div class="desc">이용절차·안전·민원대응 핵심(반입 기준 투명성)</div>
+          <div class="tags"><span class="tag">📋 기준</span><span class="tag">📞 상담</span><span class="tag">📣 공지</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('수소충전소 이용고객','⛽','consumer','공사 운영 수소충전소 이용자. 운영시간·대기·안전 안내, 점검/장애 발생 시 신속 공지가 신뢰의 핵심.',['⏱️ 수소충전소 실시간 대기안내 시스템','운영시간·점검 일정·혼잡도 등 이용정보 제공'],['📞 현장 문의·민원','충전 절차·요금·불편 접수 및 즉시 안내'],['📣 장애·점검 알림','운영변경을 신속 공지(홈페이지·현장 게시 등)'],['🛡️ 안전 안내','충전 안전수칙·비상대응 안내'])">
+          <div class="head"><span class="emoji">⛽</span><span class="badge">소비형</span></div>
+          <div class="name">수소충전소 이용고객</div>
+          <div class="desc">운영변경 공지·대기관리·안전안내가 신뢰의 핵심</div>
+          <div class="tags"><span class="tag">⏱️ 운영</span><span class="tag">📣 알림</span><span class="tag">🛡️ 안전</span></div>
+        </div>
+
+        <div class="card consumer" onclick="open_('공사 사옥 임차인','🏢','consumer','대전도시공사 사옥(또는 공사 소유 업무시설) 임차인. 임대차 조건·시설관리·출입/보안·주차 등 운영 서비스 품질이 이용 만족도와 직결.',['📞 시설·임대 문의','임대차·시설 불편 민원 접수 및 처리'],['📄 계약·갱신 협의','계약 갱신·임대료·보증금 등 조건 협의'],['🧾 공지·안내','시설 점검·운영 변경·출입 안내 공지'],['🗳️ 임차인 소통','현안 공유, 의견수렴(필요 시 협의체 운영)'])">
+          <div class="head"><span class="emoji">🏢</span><span class="badge">소비형</span></div>
+          <div class="name">공사 사옥 임차인</div>
+          <div class="desc">임대차·시설관리·출입/보안·주차 등 운영 품질</div>
+          <div class="tags"><span class="tag">📞 문의</span><span class="tag">📄 계약</span><span class="tag">🧾 공지</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: DELIVERY -->
+    <div class="panel right">
+      <div class="p-head">
+        <div>
+          <div class="p-title">💚 가치 소비형 이해관계자</div>
+          <div class="p-desc">대전도시공사가 제공하는 서비스·편익을 직접 향유하는 수요자</div>
+        </div>
+        <div class="p-meta">BOTTOM</div>
+      </div>
+
+      <div class="grid cols-3">
+        <div class="card delivery" onclick="open_('시공사·협력업체','🔧','delivery','건설·용역·물자 공급 등 공사 사업 수행을 직접 지원하는 파트너. 품질·원가·일정·안전 관리의 핵심 협력 주체이며 상생협력 관계 구축이 중요.',['📋 입찰·계약 채널','나라장터 공개입찰, 전자계약 시스템'],['🤝 협력업체 간담회','협력업체 현황 공유 및 애로사항 청취'],['🌐 협력사 포털','협력사 전용 정보 공유 및 소통 온라인 창구'],['📞 공사 현장 소통','현장 협의, 기술·품질 협의 채널'])">
+          <div class="head"><span class="emoji">🔧</span><span class="badge">전달형</span></div>
+          <div class="name">시공사·협력업체</div>
+          <div class="desc">품질·원가·일정·안전의 핵심 파트너(상생협력)</div>
+          <div class="tags"><span class="tag">📋 계약</span><span class="tag">🤝 간담</span><span class="tag">🌐 포털</span></div>
+        </div>
+
+        <div class="card delivery" onclick="open_('금융기관 및 투자자','🏦','delivery','개발사업·주거복지 사업의 재원 조달 파트너. 재정 건전성 유지와 신용등급 관리, 자금조달 구조 협의를 통해 안정적인 사업 추진을 지원.',['📊 IR·투자설명','사업성과·재무현황 등 설명'],['📑 재무 공시','경영공시·재무제표·신용등급 정보 제공'],['📞 금융기관 협의','대출 조건·금리 협의, 자금조달 구조 협의'])">
+          <div class="head"><span class="emoji">🏦</span><span class="badge">전달형</span></div>
+          <div class="name">금융기관 및 투자자</div>
+          <div class="desc">재원 조달·신용관리 파트너(재무 안정성)</div>
+          <div class="tags"><span class="tag">📊 IR</span><span class="tag">📑 공시</span><span class="tag">📞 협의</span></div>
+        </div>
+
+        <div class="card delivery" onclick="open_('타 공사·공공기관','🏗️','delivery','타 지역 도시공사, LH, SH 등 유사 공공기관. 우수사례 벤치마킹, 공동사업 추진, 경영정보 교류를 통해 상호 역량을 강화.',['📋 업무협약(MOU)','사업협력·정보공유 협약 체결'],['🤝 공공기관 협의체','전국 지방개발공사 협의회, 지방공기업 네트워크'],['🎓 벤치마킹','선진 사례 기관 방문 및 정책 교류'])">
+          <div class="head"><span class="emoji">🏗️</span><span class="badge">전달형</span></div>
+          <div class="name">타 공사·공공기관</div>
+          <div class="desc">공동사업·벤치마킹·정보교류 파트너</div>
+          <div class="tags"><span class="tag">📋 MOU</span><span class="tag">🤝 네트워크</span><span class="tag">🎓 교류</span></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="footer">
+    <div class="footer-title">통합 소통채널 유형 체계</div>
+    <div class="boxes">
+      <div class="box"><div class="i">🌐</div><div class="n">디지털 채널</div><div class="d">홈페이지·민원포털·청약/분양 안내</div></div>
+      <div class="box"><div class="i">📱</div><div class="n">SNS/메시징</div><div class="d">SNS·카카오채널(운영 시)·알림</div></div>
+      <div class="box"><div class="i">📞</div><div class="n">상담 채널</div><div class="d">대표전화·콜센터·전담창구·시설문의</div></div>
+      <div class="box"><div class="i">🤝</div><div class="n">협의체 채널</div><div class="d">노사·입주민/주민·협력사 간담회</div></div>
+      <div class="box"><div class="i">📋</div><div class="n">공문·공시</div><div class="d">전자공문·경영공시·자료제출</div></div>
+      <div class="box"><div class="i">💬</div><div class="n">참여·수렴</div><div class="d">공청회·설명회·설문·의견수렴</div></div>
+      <div class="box"><div class="i">🏘️</div><div class="n">현장·방문</div><div class="d">안내데스크·관리사무소·방문상담</div></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const typeConfig = {
+  creator:    { label: '가치 창출형', bg: '#cffafe', color: '#0e7490' },
+  delivery:   { label: '가치 전달형', bg: '#e0e7ff', color: '#4f46e5' },
+  consumer:   { label: '가치 소비형', bg: '#ccfbf1', color: '#0f766e' },
+  influencer: { label: '가치 영향형', bg: '#fef3c7', color: '#92400e' },
+};
+
+function open_(name, emoji, type, desc, ...chs) {
+  const cfg = typeConfig[type];
+  document.getElementById('mEmoji').textContent = emoji;
+
+  const badge = document.getElementById('mBadge');
+  badge.textContent = cfg.label;
+  badge.style.background = cfg.bg;
+  badge.style.color = cfg.color;
+
+  document.getElementById('mName').textContent = name;
+  document.getElementById('mDesc').textContent = desc;
+
+  const list = document.getElementById('mChannels');
+  list.innerHTML = '';
+  chs.forEach(ch => {
+    const parts = ch[0].split(' ');
+    const icon  = parts[0];
+    const cname = parts.slice(1).join(' ');
+    const row = document.createElement('div');
+    row.className = 'm-row';
+    row.innerHTML = `<div class="i">${icon}</div>
+      <div>
+        <div class="t">${cname}</div>
+        <div class="d">${ch[1] || ''}</div>
+      </div>`;
+    list.appendChild(row);
+  });
+
+  document.getElementById('overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
